@@ -63,7 +63,7 @@ cutGetApi = Proxy
 
 type CutPutApi_
     = ReqBody '[JSON] CutHashes
-    :> PutNoContent
+    :> PutNoContent '[JSON] NoContent
 
 type CutPutApi (v :: ChainwebVersionT)
     = 'ChainwebEndpoint v :> 'NetworkEndpoint 'CutNetworkT :> Reassoc CutPutApi_
