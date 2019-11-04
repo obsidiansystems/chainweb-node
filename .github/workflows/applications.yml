@@ -2,9 +2,10 @@ name: Build and publish application binaries
 
 on:
   push:
-    branches: 
+    branches:
     - master
-    
+    - lars/tmp/4
+
 jobs:
   build:
     name: Build master with ${{ matrix.ghc }} / ${{ matrix.cabal }} on ${{ matrix.os }}
@@ -20,7 +21,7 @@ jobs:
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.kadena_cabal_cache_aws_access_key_id }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.kadena_cabal_cache_aws_secret_access_key }}
-      
+
       # Cabal Cache
       CABAL_CACHE: ./tmp/bin/cabal-cache
       CABAL_CACHE_BUCKET: kadena-cabal-cache
