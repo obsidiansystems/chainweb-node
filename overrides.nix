@@ -10,11 +10,32 @@ let # Working on getting this function upstreamed into nixpkgs, but
            inherit sha256;
          }) {};
 
+    buildButDontRunTests = p: overrideCabal p (drv: {
+      doCheck = false;
+      buildTests = true;
+    });
+
+    buildButDontRunBenchmarks = p: overrideCabal p (drv: {
+      doBenchmark = false;
+      buildBenchmarks = true;
+    });
+
+    installAllBuiltBinaries = p: overrideCabal p (drv: {
+      preInstall = ''
+        mkdir -p "$out/bin"
+        for x in $(ls dist/build) ; do
+          if [ -x "dist/build/$x/$x" -a -f "dist/build/$x/$x" ] ; then
+            cp "dist/build/$x/$x" "$out/bin/" #TODO: if $bin exists, use it
+          fi
+        done
+      '' + (drv.preInstall or "");
+    });
+
     ourOverrides = {
       pact = dontCheck ( addBuildDepend (self.callCabal2nix "pact" pactSrc {}) pkgs.z3);
 
       chainweb = enableCabalFlag (
-        justStaticExecutables (enableDWARFDebugging super.chainweb)) "use_systemd";
+        justStaticExecutables (enableDWARFDebugging (buildButDontRunTests (buildButDontRunBenchmarks (installAllBuiltBinaries super.chainweb))))) "use_systemd";
 
       chainweb-storage = dontCheck (self.callCabal2nix "chainweb-storage" (pkgs.fetchFromGitHub {
         owner = "kadena-io";
